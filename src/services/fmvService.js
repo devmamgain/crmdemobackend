@@ -77,6 +77,19 @@ export function parseInventory(buffer) {
  * Pipeline: parsed inventory lines -> asset normalization/matching -> comparable transactions
  * -> unit FMV -> recovery value -> buy price -> resale value -> margin. Pure (no I/O) so the seed can reuse it.
  */
+/** Most recent comparable transaction (by transactionDate). Display-only; never feeds the FMV maths. */
+export function latestSale(transactions = []) {
+  let best = null;
+  for (const t of transactions || []) {
+    const time = new Date(t?.transactionDate).getTime();
+    if (!Number.isFinite(time) || !Number.isFinite(t?.price)) continue;
+    if (!best || time > best.time) best = { time, price: t.price };
+  }
+  return best
+    ? { lastSoldPrice: best.price, lastSoldDate: new Date(best.time) }
+    : { lastSoldPrice: null, lastSoldDate: null };
+}
+
 export function buildItems(lines, index, ratios) {
   return lines.map((line) => {
     const { condition, assumed } = normalizeCondition(line.conditionRaw);
@@ -111,6 +124,7 @@ export function buildItems(lines, index, ratios) {
       matchType,
       matchedModel: match.doc.model,
       sourceType: match.doc.sourceType,
+      ...latestSale(match.doc.transactions),
       ...calc,
     };
   });

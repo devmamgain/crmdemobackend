@@ -60,6 +60,7 @@ export async function upsertMarketValue({ model, category, brand, prices }) {
         category: String(category || 'Other').trim(),
         brand: String(brand || name.split(/\s+/)[0]).trim(),
         marketPrices: list,
+        transactions: [], // user-supplied prices carry no sold dates
         currentFMV: round2(median(list)),
         lastUpdated: new Date(),
         sourceType: 'user_supplied',

@@ -7,6 +7,16 @@ const marketValueSchema = new mongoose.Schema(
     category: { type: String, default: 'Other' },
     brand: { type: String, default: '' },
     marketPrices: { type: [Number], default: [] }, // historical sale prices (per unit, USD)
+    // Dated comparable sales. marketPrices stays the input to FMV; transactions only adds the sold date.
+    transactions: {
+      type: [
+        new mongoose.Schema(
+          { price: { type: Number, required: true, min: 0 }, transactionDate: { type: Date, required: true } },
+          { _id: false }
+        ),
+      ],
+      default: [],
+    },
     currentFMV: { type: Number, default: 0 },      // median of marketPrices at last refresh
     currency: { type: String, default: 'USD' },
     conditionAdjustments: {

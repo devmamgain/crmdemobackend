@@ -140,6 +140,12 @@ async function run() {
       category: m.category,
       brand: m.brand,
       marketPrices: m.prices,
+      // Demo transaction dates (1:1 with prices), 1-6 months back, at UTC midnight.
+      transactions: m.prices.map((price) => {
+        const d = daysAgo(between(7, 180));
+        d.setUTCHours(0, 0, 0, 0);
+        return { price, transactionDate: d };
+      }),
       currentFMV: round2(median(m.prices)),
       currency: 'USD',
       conditionAdjustments: DEFAULT_CONDITION_ADJUSTMENTS,
@@ -178,6 +184,6 @@ async function run() {
 
 run().catch(async (err) => {
   console.error(`Seed failed: ${err.message}`);
-  await mongoose.disconnect().catch(() => {});
+  await mongoose.disconnect().catch(() => { });
   process.exit(1);
 });
